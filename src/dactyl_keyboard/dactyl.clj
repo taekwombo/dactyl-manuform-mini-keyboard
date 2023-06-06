@@ -597,8 +597,15 @@
     right-wall
     left-wall
     ; back wall
-    (for [x (range 0 ncols)] (key-wall-brace x 0 0 1 web-post-tl x       0 0 1 web-post-tr))
-    (for [x (range 1 ncols)] (key-wall-brace x 0 0 1 web-post-tl (dec x) 0 0 1 web-post-tr))
+    ; Before Ring Finger
+    (for [x (range 0 4)] (key-wall-brace x 0 0 1 web-post-tl x       0 0 1 web-post-tr))
+    (for [x (range 1 4)] (key-wall-brace x 0 0 1 web-post-tl (dec x) 0 0 1 web-post-tr))
+    ; After Ring Finger
+    (for [x (range 5 ncols)] (key-wall-brace x 0 0 1 web-post-tl x       0 0 1 web-post-tr))
+    (for [x (range 5 ncols)] (key-wall-brace x 0 0 1 web-post-tl (dec x) 0 0 1 web-post-tr))
+    ; Thicker Connection between pinky and ring finger.
+    (key-wall-brace 4 0 0.5 1 web-post-tl 3 0 0 1 web-post-tr)
+    (key-wall-brace 4 0 0.5 1 web-post-tl 4       0 0 1 web-post-tr)
     ; front wall
     (wall-brace
       thumb-br-place 0.5 -1 web-post-tr (partial key-place 1 lastrow) 0.5 -1 web-post-br)
@@ -607,7 +614,8 @@
     (key-wall-brace 2 lastrow 0 -1 web-post-br 3 lastrow -0.5 -1 web-post-bl)
     (key-wall-brace 3 lastrow -0.5 -1 web-post-bl 3 lastrow 0.5 -1 web-post-br)
     (key-wall-brace 3 lastrow 0.5 -1 web-post-br 4 cornerrow 0.5 -1 web-post-bl)
-    (for [x (range 4 ncols)] (key-wall-brace x cornerrow 0 -1 web-post-bl x       cornerrow 0 -1 web-post-br)) ; TODO fix extra wall
+    (key-wall-brace 4 cornerrow 0.5 -1 web-post-bl 4 cornerrow 0 -1 web-post-br)
+    (for [x (range 5 ncols)] (key-wall-brace x cornerrow 0 -1 web-post-bl x       cornerrow 0 -1 web-post-br))
     (for [x (range 5 ncols)] (key-wall-brace x cornerrow 0 -1 web-post-bl (dec x) cornerrow 0 -1 web-post-br))
     ; thumb walls
     thumb-key-top-left-walls
@@ -772,6 +780,22 @@
                                       screw-insert-outers)
                                (translate [0 0 -10] screw-insert-screw-holes))))))
 
+(def bottom-plate
+    (translate [0 0 1]
+               (extrude-linear {:height 2 :twist 0 :convexity 0}
+                               (difference (project (union case-walls screw-insert-outers))
+                                           (cut (union case-walls screw-insert-outers))
+                                           ))
+               ))
+
+(spit "things/right-plate-cut.scad"
+      (write-scad
+        (cut
+          (translate [0 0 -2]                ;biggest cutout on top
+                     (difference
+                          bottom-plate
+                         ; bottom-wall-usb-holder
+                         (screw-insert-all-shapes 1 1 50))))))
 ; (spit "things/test.scad"
 ;       (write-scad
 ;        (difference trrs-holder trrs-holder-hole)))

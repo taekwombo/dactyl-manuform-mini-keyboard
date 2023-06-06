@@ -761,7 +761,6 @@
         (union
          key-holes
          pinky-connectors
-         pinky-walls
          connectors
          thumb
          thumb-connectors
@@ -771,33 +770,66 @@
 
         (translate [0 0 -20] (cube 350 350 40)))))
 
-(spit "things/right-plate.scad"
-      (write-scad
-       (cut
-        (translate [0 0 -0.1]
-                   (difference (union case-walls
-                                      pinky-walls
-                                      screw-insert-outers)
-                               (translate [0 0 -10] screw-insert-screw-holes))))))
-
-(def bottom-plate
-    (translate [0 0 1]
-               (extrude-linear {:height 2 :twist 0 :convexity 0}
-                               (difference (project (union case-walls screw-insert-outers))
-                                           (cut (union case-walls screw-insert-outers))
-                                           ))
-               ))
-
 (spit "things/right-plate-cut.scad"
-      (write-scad
-        (cut
-          (translate [0 0 -2]                ;biggest cutout on top
-                     (difference
-                          bottom-plate
-                         ; bottom-wall-usb-holder
-                         (screw-insert-all-shapes 1 1 50))))))
-; (spit "things/test.scad"
-;       (write-scad
-;        (difference trrs-holder trrs-holder-hole)))
+  (write-scad
+    (cut
+      (translate [0 0 -0.1]
+        (difference
+          (union
+            case-walls
+            screw-insert-outers
+          )
+          (translate [0 0 -10] screw-insert-screw-holes)
+        )
+      )
+    )
+  )
+)
+
+(def filled-plate
+  (->> (cube mount-height mount-width plate-thickness)
+       (translate [0 0 (/ plate-thickness 2)])
+  )
+)
+
+(def key-fills
+  (apply union
+         (for [column columns
+               row rows
+               :when (or (.contains [1 2 3] column) ; Place additional row.
+                         (not= row lastrow))]
+           (->> filled-plate
+                (key-place column row)))))
+
+(def thumb-fills
+  (union
+    (thumb-tl-place filled-plate)
+    (thumb-tm-place filled-plate)
+    (thumb-tr-place filled-plate)
+    (thumb-br-place filled-plate)
+  )
+)
+
+(spit "things/right-plate.scad"
+  (write-scad
+    (project
+      (translate [0 0 -0.1]
+        (difference
+          (union
+            case-walls
+            key-holes
+            key-fills
+            thumb-fills
+            connectors
+            thumb
+            thumb-connectors
+            screw-insert-outers
+          )
+          (translate [0 0 -10] screw-insert-screw-holes)
+        )
+      )
+    )
+  )
+)
 
 (defn -main [dum] 1)  ; dummy to make it easier to batch

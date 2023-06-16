@@ -15,7 +15,7 @@
 (def nrows 5)
 (def ncols 6)
 
-(def α (/ π 36))                        ; curvature of the columns
+(def α (/ π 32))                        ; curvature of the columns
 (def β (/ π 52))                        ; curvature of the rows
 (def centerrow (- nrows 2))             ; controls front-back tilt
 (def centercol 0.5)                     ; controls left-right tilt / tenting (higher number is more tenting)
@@ -27,7 +27,7 @@
 
 (defn column-offset [column] (cond
                                (= column 2) [0 2.82 0]
-                               (>= column 4) [0 -14 0]            ; original [0 -5.8 5.64]
+                               (>= column 4) [0 -16 1]            ; original [0 -5.8 5.64]
                                :else [0 0 0]))
 
 ;; Move thumb cluster outside of the center of keyboard.
@@ -35,7 +35,7 @@
 ;; Reduce the angle of column - make it more flat like lily.
 (def thumb-offsets [-15 -3 7])
 
-(def keyboard-z-offset 9)               ; controls overall height; original=9 with centercol=3; use 16 for centercol=2
+(def keyboard-z-offset 10)               ; controls overall height; original=9 with centercol=3; use 16 for centercol=2
 
 (def extra-width 2.5)                   ; extra space between the base of keys; original= 2
 (def extra-height 1.0)                  ; original= 0.5
@@ -346,32 +346,23 @@
   (map + (key-position 1 cornerrow [(/ mount-width 2) (- (/ mount-height 2)) 0])
        thumb-offsets))
 
-;   TL  TM  TR
-;           BR
+;   TL TR
+;       BR
 
 (defn thumb-tr-place [shape]
   (->> shape
        (rotate (deg2rad  9) [1 0 0])
-       (rotate (deg2rad -5) [0 1 0])
-       (rotate (deg2rad  5) [0 0 1]) ; original 10
+       (rotate (deg2rad  0) [0 1 0])
+       (rotate (deg2rad  0) [0 0 1]) ; original 10
        (translate thumborigin)
-       (translate [-12.5 -9 -6]))) ; original 1.5u  (translate [-12 -16 3])
-(defn thumb-tm-place [shape]
-  (->> shape
-       (rotate (deg2rad  6) [1 0 0])
-       (rotate (deg2rad 0) [0 1 0])
-       (rotate (deg2rad  20) [0 0 1]) ; original 10
-       (translate thumborigin)
-       (translate [-34 -14 -7.5]))) ; original 1.5u (translate [-32 -15 -2])))
+       (translate [-12.5 -9 -5]))) ; original 1.5u  (translate [-12 -16 3])
 (defn thumb-tl-place [shape]
   (->> shape
-       (rotate (deg2rad  6) [1 0 0])
-       (rotate (deg2rad  5) [0 1 0])
-       (rotate (deg2rad 35) [0 0 1])
+       (rotate (deg2rad  9) [1 0 0])
+       (rotate (deg2rad 5) [0 1 0])
+       (rotate (deg2rad  10) [0 0 1]) ; original 10
        (translate thumborigin)
-       (translate [-52 -27 -7]))) ;        (translate [-51 -25 -12])))
-
-; Bottom Middle
+       (translate [-34 -15 -5]))) ; original 1.5u (translate [-32 -15 -2])))
 (defn thumb-br-place [shape]
   (->> shape
        (rotate (deg2rad  5) [1 0 0])
@@ -380,15 +371,16 @@
        (translate thumborigin)
        (translate [4 -28 -7])))
 
-
 (defn thumb-1x-layout [shape]
   (union
    (thumb-br-place shape)
-   (thumb-tm-place shape)
+   (thumb-tr-place shape)
    (thumb-tl-place shape)))
 
 (defn thumb-15x-layout [shape]
   (union
+   (thumb-br-place shape)
+   (thumb-tl-place shape)
    (thumb-tr-place shape)))
 
 (def larger-plate
@@ -427,21 +419,16 @@
       (thumb-tr-place web-post-tr)
       (key-place 0 cornerrow web-post-bl)
       (key-place 0 cornerrow web-post-br))
-    (triangle-hulls     ;; TR - TM - [Col:0,1 Row: 4]
+    (triangle-hulls     ;; TR - TL - [Col:0,1 Row: 4]
       (thumb-tr-place web-post-tr)
       (key-place 1 lastrow web-post-tl)
       (key-place 0 cornerrow web-post-br)
       (key-place 1 cornerrow web-post-bl))
-    (triangle-hulls     ;; TM -> TR
-      (thumb-tm-place web-post-tr)
-      (thumb-tm-place web-post-br)
-      (thumb-tr-place thumb-post-tl)
-      (thumb-tr-place thumb-post-bl))
-    (triangle-hulls     ;; TL - TM
+    (triangle-hulls     ;; TL -> TR
       (thumb-tl-place web-post-tr)
       (thumb-tl-place web-post-br)
-      (thumb-tm-place web-post-tl)
-      (thumb-tm-place web-post-bl))
+      (thumb-tr-place thumb-post-tl)
+      (thumb-tr-place thumb-post-bl))
     (triangle-hulls     ;; TR - BR - [Col:1 Row: 4]
       (thumb-tr-place (translate [(/ keyswitch-width -2) 0 0] web-post-br))
       (thumb-br-place web-post-tl)
@@ -526,47 +513,37 @@
       (for [y (range 0 lastrow)] (key-wall-brace 0 y -1 0 tr 0 y -1 0 br))
       (for [y (range 1 lastrow)] (key-wall-brace 0 (dec y) -1 0 br 0 y -1 0 tr)))))
 
-(def thumb-key-top-left-walls
-  (union
-    ; Walls surrounding the key  
-    (wall-brace thumb-tl-place 0 -1 web-post-bl thumb-tl-place 0 -1 web-post-br)
-    (wall-brace thumb-tl-place -1 -1 web-post-bl thumb-tl-place 1 -1 web-post-bl)
-    (wall-brace thumb-tl-place -1 1 web-post-tl thumb-tl-place -1 -1 web-post-bl)
-    (wall-brace thumb-tl-place -1 1 web-post-tl thumb-tl-place 0 1 web-post-tr)
-    ; Walls between TL and TM key
-    (wall-brace thumb-tl-place 0 1 web-post-tr thumb-tm-place 0 1 web-post-tl)
-    (wall-brace thumb-tl-place 0 -1 web-post-br thumb-tm-place 0 -1 web-post-bl)
-))
-
 (defn tm-join [pos]     ; Thumb Middle Top - between top right and top left.
   (translate [(/ keyswitch-width -2) 0 0] pos))
 
-(def thumb-key-top-middle-walls
+(def thumb-key-top-left-walls
   (union
     ; Bottom walls
-    (wall-brace thumb-tm-place 0 -1 web-post-bl thumb-tm-place 0 -1 web-post-br)
+    (wall-brace thumb-tl-place 0 -0.75 web-post-bl thumb-tl-place 0 -0.75 web-post-br)
+    (wall-brace thumb-tl-place -0.75 0 web-post-bl thumb-tl-place 0 -0.75 web-post-bl)
+    ; Left walls
+    (wall-brace thumb-tl-place -0.75 0 web-post-tl thumb-tl-place -0.75 0 web-post-bl)
+    (wall-brace thumb-tl-place 0 0.75 web-post-tl thumb-tl-place -0.75 0 web-post-tl)
     ; Top walls
-    (wall-brace thumb-tm-place 0 1 (tm-join web-post-tr) thumb-tm-place 0 1 web-post-tl)
+    (wall-brace thumb-tl-place 0 0.75 (tm-join web-post-tr) thumb-tl-place 0 0.75 web-post-tl)
     (bottom-hull
-      (thumb-tm-place (translate (wall-locate3 0 1) (tm-join web-post-tr)))
-      (thumb-tm-place (translate (wall-locate2 0 1) (tm-join web-post-tr)))
-      (thumb-tm-place (translate (wall-locate2 1 1) (tm-join web-post-tr)))
+      (thumb-tl-place (translate (wall-locate3 0 0.75) (tm-join web-post-tr)))
+      (thumb-tl-place (translate (wall-locate2 0 0.75) (tm-join web-post-tr)))
+      (thumb-tl-place (translate (wall-locate2 0 0.75) (tm-join web-post-tr)))
       ((partial key-place 0 cornerrow) (translate (wall-locate2 -1 0) web-post-bl))
       ((partial key-place 0 cornerrow) (translate (wall-locate3 -1 0) web-post-bl))
-      ; Could have been better.
-      (key-place 0 cornerrow (translate (wall-locate3 -0.7 -0.2) web-post-bl))
     )
     (hull ; Connection with Left Wall
-      (thumb-tm-place web-post-tr)
-      (thumb-tm-place (tm-join web-post-tr))
-      (thumb-tm-place (translate (wall-locate1 0 1) (tm-join web-post-tr)))
-      (thumb-tm-place (translate (wall-locate2 0 1) (tm-join web-post-tr)))
-      (thumb-tm-place (translate (wall-locate3 0 1) (tm-join web-post-tr)))
+      (thumb-tl-place web-post-tr)
+      (thumb-tl-place (tm-join web-post-tr))
+      (thumb-tl-place (translate (wall-locate1 0 0.75) (tm-join web-post-tr)))
+      (thumb-tl-place (translate (wall-locate2 0 0.75) (tm-join web-post-tr)))
+      (thumb-tl-place (translate (wall-locate3 0 0.75) (tm-join web-post-tr)))
       ((partial key-place 0 cornerrow) (translate (wall-locate3 -1 0) web-post-bl))
       ((partial key-place 0 cornerrow) (translate (wall-locate2 -1 0) web-post-bl))
     )
     (hull
-      (thumb-tm-place web-post-tr)
+      (thumb-tl-place web-post-tr)
       ((partial key-place 0 cornerrow) (translate (wall-locate3 -1 0) web-post-bl))
       ((partial key-place 0 cornerrow) (translate (wall-locate2 -1 0) web-post-bl))
       ((partial key-place 0 cornerrow) (translate (wall-locate1 -1 0) web-post-bl))
@@ -575,21 +552,20 @@
     )
 ))
 
+(def thumb-key-bottom-right-walls
+  (union
+    (wall-brace thumb-br-place -0.5 -0.5 web-post-bl thumb-br-place 0.5 -0.5 web-post-br)  ; Bottom
+    (wall-brace thumb-br-place 0.5 -0.5 web-post-br thumb-br-place 0.5 -1 web-post-tr)  ; Right
+    (wall-brace thumb-br-place -0.5 -1 web-post-tl thumb-br-place -0.5 -0.5 web-post-bl)  ; Left
+))
+
 (def thumb-key-top-right-walls
   (union
-    ; Connect with Top Middle
-    (wall-brace thumb-tm-place 0 -1 web-post-br thumb-tr-place 0 -1 web-post-bl)
-    ; Connect with Bottom Right
+    ; Bottom walls connecting to neighbours
     (wall-brace thumb-tr-place 0 -1 web-post-bl thumb-tr-place 0 -1 (translate [(/ keyswitch-width -2) 0 0] web-post-br))
     (wall-brace thumb-tr-place 0 -1 (translate [(/ keyswitch-width -2) 0 0] web-post-br)
                 thumb-br-place -0.5 -1 web-post-tl)
-))
-
-(def thumb-key-bottom-right-walls
-  (union
-    (wall-brace thumb-br-place -0.5 -0.5 web-post-bl thumb-br-place -0.5 -1 web-post-tl)  ; Left
-    (wall-brace thumb-br-place -0.5 -0.5 web-post-bl thumb-br-place 0.5 -0.5 web-post-br) ; Bottom
-    (wall-brace thumb-br-place 0.5 -0.5 web-post-br thumb-br-place 0.5 -1 web-post-tr)    ; Right
+    (wall-brace thumb-tr-place 0 -1 web-post-bl thumb-tl-place 0 -0.75 web-post-br)
 ))
 
 (def case-walls
@@ -619,7 +595,6 @@
     (for [x (range 5 ncols)] (key-wall-brace x cornerrow 0 -1 web-post-bl (dec x) cornerrow 0 -1 web-post-br))
     ; thumb walls
     thumb-key-top-left-walls
-    thumb-key-top-middle-walls
     thumb-key-top-right-walls
     thumb-key-bottom-right-walls
   )
@@ -687,11 +662,11 @@
 
 (defn screw-insert-all-shapes [bottom-radius top-radius height]
   (union 
-    (screw-insert 0 0                 bottom-radius top-radius height [9 8 0])
-    (screw-insert 0 lastrow           bottom-radius top-radius height [8 12 0])
-    (screw-insert lastcol lastrow     bottom-radius top-radius height [-3 12 0])
+    (screw-insert 1 0                 bottom-radius top-radius height [13 -1 0])
+    (screw-insert 0 lastrow           bottom-radius top-radius (+ 1 height) [9 11 0])
+    (screw-insert lastcol lastrow     bottom-radius top-radius height [-3 14 0])
     (screw-insert lastcol 0           bottom-radius top-radius height [-3 6 0])
-    (screw-insert 2 lastrow           bottom-radius top-radius height [-10 3 0])))
+    (screw-insert 2 lastrow           bottom-radius top-radius height [-10 1 0])))
 
 ; Hole Depth Y: 4.4
 (def screw-insert-height 4)
@@ -731,6 +706,73 @@
    (key-wall-brace lastcol cornerrow 0 -1 web-post-br lastcol cornerrow 0 -1 wide-post-br)
    (key-wall-brace lastcol 0 0 1 web-post-tr lastcol 0 0 1 wide-post-tr)))
 
+; Gateron Low Profile Switch
+(def switch
+  (union
+    (translate [0 0 (/ 5.75 -2)] (cube keyswitch-width keyswitch-height 5.75))
+    (translate [0 0 (/ 3.35 2)] (cube (- keyswitch-width 2) (- keyswitch-height 2) 3.35))
+    (translate [0 0 3] (cube (/ keyswitch-width 2) (/ keyswitch-height 2) 3))
+  )
+)
+
+(def switch-fills
+  (apply union
+         (for [column columns
+               row rows
+               :when (or (.contains [1 2 3] column) ; Place additional row.
+                         (not= row lastrow))]
+           (->> switch
+                (key-place column row)))))
+
+
+;; DEBUG OBJECTS AND HOLES
+; battery
+(def battery
+  (translate [0 0 2] (cube 40 30 4)))
+
+; Power Switch
+(def power-switch
+  (->>
+    (union
+      (cube 3.5 9 3.5)
+      (translate [0 0 (/ 3.5 2)] (cube 1.6 1.5 2))
+    )
+    (rotate (/ π 2) [0 1 0])
+    (rotate (/ π 2) [0 0 1])
+    (translate [80 57 (+ (/ 3.5 2) 5)])
+  )
+)
+
+; Reset Switch
+(def reset-switch
+  (->>
+    (union
+      (cube 3 6 5)
+      (translate [0 0 2.5] (cube 1.6 1.5 2))
+    )
+    (rotate (/ π 2) [0 -1 0])
+    (translate [1.5 0 2.5])
+    (translate [(- (* (- centercol) column-x-delta)) 0 0])                  ; Place it at first column
+    (translate [0 (* (+ (- 3) centerrow) (+ mount-height extra-height)) 0]) ; Place it at 4th keycap side
+    (translate [0 (- (/ keyswitch-height 2) 3) 0])
+    (translate [(- (+ (/ mount-width 2) wall-xy-offset wall-thickness)) 0 0])
+    (translate [0 0 2])
+  )
+)
+
+(def usb-c-connector
+  (->> (union
+        (cube 8.5 3 2.5)
+        (translate [0 -19 0] (cube 18 34 3.2))
+      )
+      (translate [0 -1.5 (+ 4.5 2)])
+      (translate [(- (* (- centercol) column-x-delta)) 0 0])                  ; Place it at first column
+      (translate [(- 9 (/ keyswitch-width 2)) 0 0]) ; Left nano border to the left border of column
+      (translate [0 (* (+ centerrow 1) (+ keyswitch-height extra-height)) 0])
+      (translate [0 (+ extra-height wall-thickness wall-xy-offset 6) 0])
+    )
+)
+
 (def model-right
   (difference
     (union
@@ -743,7 +785,9 @@
           case-walls
           screw-insert-outers
         )
-        usb-jack
+        usb-c-connector
+        power-switch
+        reset-switch
         screw-insert-holes
       )
     )
@@ -765,8 +809,18 @@
          thumb
          thumb-connectors
          case-walls
+         switch-fills
+         (thumb-tl-place switch)
+         (thumb-tr-place switch)
+         (thumb-br-place switch)
+         (translate [84 40 0] battery)
+         screw-insert-outers
+         caps
          thumbcaps
-         caps)
+         power-switch
+         usb-c-connector
+         reset-switch
+         )
 
         (translate [0 0 -20] (cube 350 350 40)))))
 
@@ -804,7 +858,6 @@
 (def thumb-fills
   (union
     (thumb-tl-place filled-plate)
-    (thumb-tm-place filled-plate)
     (thumb-tr-place filled-plate)
     (thumb-br-place filled-plate)
   )
@@ -812,20 +865,22 @@
 
 (spit "things/right-plate.scad"
   (write-scad
-    (project
-      (translate [0 0 -0.1]
-        (difference
-          (union
-            case-walls
-            key-holes
-            key-fills
-            thumb-fills
-            connectors
-            thumb
-            thumb-connectors
-            screw-insert-outers
+    (extrude-linear {:height plate-thickness :twist 0 :convexity 0 }
+      (project
+        (translate [0 0 -0.1]
+          (difference
+            (union
+              case-walls
+              key-holes
+              key-fills
+              thumb-fills
+              connectors
+              thumb
+              thumb-connectors
+              screw-insert-outers
+            )
+            (translate [0 0 -10] screw-insert-screw-holes)
           )
-          (translate [0 0 -10] screw-insert-screw-holes)
         )
       )
     )

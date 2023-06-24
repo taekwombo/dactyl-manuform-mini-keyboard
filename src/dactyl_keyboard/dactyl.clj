@@ -33,7 +33,7 @@
 ;; Move thumb cluster outside of the center of keyboard.
 ;; Try to introduce another bottom level key for index finger.
 ;; Reduce the angle of column - make it more flat like lily.
-(def thumb-offsets [-15 -3 7])
+(def thumb-offsets [-16 -3 7])
 
 (def keyboard-z-offset 10)               ; controls overall height; original=9 with centercol=3; use 16 for centercol=2
 
@@ -346,9 +346,6 @@
   (map + (key-position 1 cornerrow [(/ mount-width 2) (- (/ mount-height 2)) 0])
        thumb-offsets))
 
-;   TL TR
-;       BR
-
 (defn thumb-tr-place [shape]
   (->> shape
        (rotate (deg2rad  9) [1 0 0])
@@ -377,30 +374,13 @@
    (thumb-tr-place shape)
    (thumb-tl-place shape)))
 
-(defn thumb-15x-layout [shape]
-  (union
-   (thumb-br-place shape)
-   (thumb-tl-place shape)
-   (thumb-tr-place shape)))
-
-(def larger-plate
-  (let [plate-height (- (/ (- sa-double-length mount-height) 3) 0.5)
-        top-plate (->> (cube mount-width plate-height web-thickness)
-                       (translate [0 (/ (+ plate-height mount-height) 2)
-                                   (- plate-thickness (/ web-thickness 2))]))]
-    (union top-plate (mirror [0 1 0] top-plate))))
-
 (def thumbcaps
   (union
-   (thumb-1x-layout (sa-cap 1))
-   (thumb-15x-layout (rotate (/ π 2) [0 0 1] (sa-cap 1)))))
+   (thumb-1x-layout (sa-cap 1))))
 
 (def thumb
-  (union
    (thumb-1x-layout single-plate)
-   (thumb-15x-layout single-plate)
-   ; (thumb-15x-layout larger-plate)
-))
+)
 
 (def thumb-post-tr (translate [(- (/ mount-width 2) post-adj)  (- (/ mount-height  2) post-adj) 0] web-post))
 (def thumb-post-tl (translate [(+ (/ mount-width -2) post-adj) (- (/ mount-height  2) post-adj) 0] web-post))
@@ -509,7 +489,8 @@
 (def left-wall
   (let [tr web-post-tl br web-post-bl]
     (union 
-      (key-wall-brace 0 0 0 1 tr 0 0 -1 0 tr)
+      (key-wall-brace 0 0 0 1 tr 0 0 -0.5 1 tr)
+      (key-wall-brace 0 0 -0.5 1 tr 0 0 -1 0 tr)
       (for [y (range 0 lastrow)] (key-wall-brace 0 y -1 0 tr 0 y -1 0 br))
       (for [y (range 1 lastrow)] (key-wall-brace 0 (dec y) -1 0 br 0 y -1 0 tr)))))
 
@@ -554,9 +535,14 @@
 
 (def thumb-key-bottom-right-walls
   (union
-    (wall-brace thumb-br-place -0.5 -0.5 web-post-bl thumb-br-place 0.5 -0.5 web-post-br)  ; Bottom
-    (wall-brace thumb-br-place 0.5 -0.5 web-post-br thumb-br-place 0.5 -1 web-post-tr)  ; Right
-    (wall-brace thumb-br-place -0.5 -1 web-post-tl thumb-br-place -0.5 -0.5 web-post-bl)  ; Left
+    ; Bottom-Left
+    (wall-brace thumb-br-place -0.5 0 web-post-bl thumb-br-place 0 -0.5 web-post-bl)
+    ; Bottom
+    (wall-brace thumb-br-place 0 -0.5 web-post-bl thumb-br-place 0 -0.5 web-post-br)
+    ; Bottom-Right
+    (wall-brace thumb-br-place 0 -0.5 web-post-br thumb-br-place 0.5 0 web-post-br)
+    (wall-brace thumb-br-place 0.5 0 web-post-br thumb-br-place 0.5 -1 web-post-tr)
+    (wall-brace thumb-br-place -0.5 -1 web-post-tl thumb-br-place -0.5 0 web-post-bl)  ; Left
 ))
 
 (def thumb-key-top-right-walls
@@ -648,7 +634,7 @@
           (cylinder [bottom-radius top-radius] height)))
    (translate [0 0 (/ height 2)] (->> (binding [*fn* 30] (sphere top-radius))))))
 
-(defn screw-insert [column row bottom-radius top-radius height offset]
+(defn screw-insert-place [column row offset]
   (let [shift-right   (= column lastcol)
         shift-left    (= column 0)
         shift-up      (and (not (or shift-right shift-left)) (= row 0))
@@ -657,16 +643,27 @@
                           (if shift-down  (key-position column row (map - (wall-locate2  0 -1) [0 (/ mount-height 2) 0]))
                               (if shift-left (map + (left-key-position row 0) (wall-locate3 -1 0))
                                   (key-position column row (map + (wall-locate2  1  0) [(/ mount-width 2) 0 0])))))]
+   (map + offset [(first position) (second position) 0]))
+)
+
+(defn screw-insert [bottom-radius top-radius height offset]
     (->> (screw-insert-shape bottom-radius top-radius height)
-         (translate (map + offset [(first position) (second position) (/ height 2)])))))
+         (translate [0 0 (/ height 2)])
+         (translate offset)))
+
+(def screw-1-pos (screw-insert-place 1 0                  [13 -1 0]))
+(def screw-2-pos (screw-insert-place 0 lastrow            [9 11 0]))
+(def screw-3-pos (screw-insert-place lastcol lastrow      [-3 14 0]))
+(def screw-4-pos (screw-insert-place lastcol 0            [-3 6 0]))
+(def screw-5-pos (screw-insert-place 2 lastrow            [-10 1 0]))
 
 (defn screw-insert-all-shapes [bottom-radius top-radius height]
   (union 
-    (screw-insert 1 0                 bottom-radius top-radius height [13 -1 0])
-    (screw-insert 0 lastrow           bottom-radius top-radius (+ 1 height) [9 11 0])
-    (screw-insert lastcol lastrow     bottom-radius top-radius height [-3 14 0])
-    (screw-insert lastcol 0           bottom-radius top-radius height [-3 6 0])
-    (screw-insert 2 lastrow           bottom-radius top-radius height [-10 1 0])))
+    (screw-insert bottom-radius top-radius height       screw-1-pos)
+    (screw-insert bottom-radius top-radius (+ 1 height) screw-2-pos)
+    (screw-insert bottom-radius top-radius height       screw-3-pos)
+    (screw-insert bottom-radius top-radius height       screw-4-pos)
+    (screw-insert bottom-radius top-radius height       screw-5-pos)))
 
 ; Hole Depth Y: 4.4
 (def screw-insert-height 4)
@@ -709,9 +706,20 @@
 ; Gateron Low Profile Switch
 (def switch
   (union
-    (translate [0 0 (/ 5.75 -2)] (cube keyswitch-width keyswitch-height 5.75))
-    (translate [0 0 (/ 3.35 2)] (cube (- keyswitch-width 2) (- keyswitch-height 2) 3.35))
-    (translate [0 0 3] (cube (/ keyswitch-width 2) (/ keyswitch-height 2) 3))
+    ; Stem
+    (->> (union
+      (cylinder (/ (+ 5.75 2) 2) 3)
+      (cube 10 5.75 3)
+      )
+      (translate [0 0 (+ 3.35 1.5)])
+    )
+    ; Top
+    (translate [0 0 (/ 3.35 2)] (cube (- keyswitch-width 1) (- keyswitch-height 1) 3.35))
+    ; Bottom
+    (translate [0 0 (/ 2.50 -2)] (cube (- keyswitch-width 2) (- keyswitch-height 2) 2.50))
+    ; Pins
+    (translate [0 0 (- (/ 2.80 -2) 2.50)] (with-fn 48 (cylinder (/ 5.25 2) 2.80)))
+    (translate [-4.75 -2.60 (- (/ 2.60 -2) 2.50)] (with-fn 48 (cylinder 1 2.60)))
   )
 )
 
@@ -725,52 +733,65 @@
                 (key-place column row)))))
 
 
-;; DEBUG OBJECTS AND HOLES
-; battery
-(def battery
-  (translate [0 0 2] (cube 40 30 4)))
 
-; Power Switch
-(def power-switch
-  (->>
-    (union
-      (cube 3.5 9 3.5)
-      (translate [0 0 (/ 3.5 2)] (cube 1.6 1.5 2))
-    )
-    (rotate (/ π 2) [0 1 0])
-    (rotate (/ π 2) [0 0 1])
-    (translate [80 57 (+ (/ 3.5 2) 5)])
-  )
-)
+(load "usb-c")
+(load "battery-switch")
 
-; Reset Switch
-(def reset-switch
-  (->>
-    (union
-      (cube 3 6 5)
-      (translate [0 0 2.5] (cube 1.6 1.5 2))
-    )
-    (rotate (/ π 2) [0 -1 0])
-    (translate [1.5 0 2.5])
+(defn place-nice!nano [shape]
+  ; Origin should be at the start of the board at the center of usb port
+  (->> shape
+    (translate [0 -1 nano-y-offset])
     (translate [(- (* (- centercol) column-x-delta)) 0 0])                  ; Place it at first column
-    (translate [0 (* (+ (- 3) centerrow) (+ mount-height extra-height)) 0]) ; Place it at 4th keycap side
-    (translate [0 (- (/ keyswitch-height 2) 3) 0])
-    (translate [(- (+ (/ mount-width 2) wall-xy-offset wall-thickness)) 0 0])
-    (translate [0 0 2])
+    (translate [(- 9 (/ keyswitch-width 2)) 0 0]) ; Left nano border to the left border of column
+    (translate [0 (* (+ centerrow 1) keyswitch-height) 0])
+    (translate [0 (+ extra-height wall-thickness wall-xy-offset 6) 0])
+    (translate [4 1.5 0])
   )
 )
 
-(def usb-c-connector
-  (->> (union
-        (cube 8.5 3 2.5)
-        (translate [0 -19 0] (cube 18 34 3.2))
-      )
-      (translate [0 -1.5 (+ 4.5 2)])
-      (translate [(- (* (- centercol) column-x-delta)) 0 0])                  ; Place it at first column
-      (translate [(- 9 (/ keyswitch-width 2)) 0 0]) ; Left nano border to the left border of column
-      (translate [0 (* (+ centerrow 1) (+ keyswitch-height extra-height)) 0])
-      (translate [0 (+ extra-height wall-thickness wall-xy-offset 6) 0])
+(def slide-clearance 0.1)
+
+(def holder
+  (place-nice!nano
+    (difference
+      (nice!nano-holder 0 0)
+      usb-c-connector
+      usb-c-cutout
     )
+  )
+)
+
+(def holder-thicker-walls
+  (place-nice!nano (union
+    (translate [14 -0.5 0] (front-wall 0 slide-clearance))
+    (translate [-4.2 -0.5 0] (front-wall 0 slide-clearance))
+  ))
+)
+
+(def holder-hole
+  (place-nice!nano (union
+    (nice!nano-holder slide-clearance slide-clearance)
+    (translate [0 -0.5 0] (front-wall slide-clearance slide-clearance))
+  ))
+)
+
+(def all-walls-and-screws
+  (union
+    (difference
+      (union
+        case-walls
+        screw-insert-outers
+        holder-thicker-walls
+      )
+      holder-hole
+      screw-insert-holes
+      power-switch
+      reset-switch
+    )
+    ; Uncomment to print holder with the case.
+    ; Update slide-clearance accordingly.
+    ; holder
+  )
 )
 
 (def model-right
@@ -780,65 +801,13 @@
       connectors
       thumb
       thumb-connectors
-      (difference
-        (union
-          case-walls
-          screw-insert-outers
-        )
-        usb-c-connector
-        power-switch
-        reset-switch
-        screw-insert-holes
-      )
+      all-walls-and-screws
     )
     (translate [0 0 -20] (cube 350 350 40))))
 
-(spit "things/right.scad"
-      (write-scad model-right))
 
 (spit "things/left.scad"
       (write-scad (mirror [-1 0 0] model-right)))
-
-(spit "things/right-test.scad"
-      (write-scad
-       (difference
-        (union
-         key-holes
-         pinky-connectors
-         connectors
-         thumb
-         thumb-connectors
-         case-walls
-         switch-fills
-         (thumb-tl-place switch)
-         (thumb-tr-place switch)
-         (thumb-br-place switch)
-         (translate [84 40 0] battery)
-         screw-insert-outers
-         caps
-         thumbcaps
-         power-switch
-         usb-c-connector
-         reset-switch
-         )
-
-        (translate [0 0 -20] (cube 350 350 40)))))
-
-(spit "things/right-plate-cut.scad"
-  (write-scad
-    (cut
-      (translate [0 0 -0.1]
-        (difference
-          (union
-            case-walls
-            screw-insert-outers
-          )
-          (translate [0 0 -10] screw-insert-screw-holes)
-        )
-      )
-    )
-  )
-)
 
 (def filled-plate
   (->> (cube mount-height mount-width plate-thickness)
@@ -863,27 +832,100 @@
   )
 )
 
-(spit "things/right-plate.scad"
-  (write-scad
-    (extrude-linear {:height plate-thickness :twist 0 :convexity 0 }
-      (project
-        (translate [0 0 -0.1]
-          (difference
-            (union
-              case-walls
-              key-holes
-              key-fills
-              thumb-fills
-              connectors
-              thumb
-              thumb-connectors
-              screw-insert-outers
-            )
-            (translate [0 0 -10] screw-insert-screw-holes)
-          )
+
+(def test-objects
+  (difference
+    (union
+      switch-fills
+      (thumb-tl-place switch)
+      (thumb-tr-place switch)
+      (thumb-br-place switch)
+      (place-battery battery)
+      (place-battery battery-holder)
+      caps
+      thumbcaps
+      power-switch
+      reset-switch
+    )
+    (translate [0 0 -20] (cube 350 350 40))
+  )
+)
+
+(def plate-projection
+  (project
+    (translate [0 0 -0.1]
+      (difference
+        (union
+          case-walls
+          key-holes
+          key-fills
+          thumb-fills
+          connectors
+          thumb
+          thumb-connectors
+          screw-insert-outers
         )
+        (translate [0 0 -10] screw-insert-screw-holes)
       )
     )
+  )
+)
+
+(def plate-extruded
+  (difference
+    (union
+      (translate [0 0 (/ plate-thickness 2)]
+        (extrude-linear
+          {:height plate-thickness :twist 0 :convexity 0 }
+          plate-projection
+        )
+      )
+      (translate [0 0 plate-thickness] (place-battery battery-holder))
+    )
+    (screw-head-hole screw-1-pos)
+    (screw-head-hole screw-2-pos)
+    (screw-head-hole screw-3-pos)
+    (screw-head-hole screw-4-pos)
+    (screw-head-hole screw-5-pos)
+  )
+)
+
+(spit "things/right.scad"
+  (write-scad model-right)
+)
+
+(spit "things/right-test.scad"
+  (write-scad
+    (union
+      (translate [0 0 (+ plate-thickness 1)]
+        (union model-right test-objects)
+      )
+      ; plate-extruded
+    )
+  )
+)
+
+(spit "things/nano-holder.scad"
+  (write-scad
+    holder
+  )
+)
+
+(spit "things/right-plate-cut.scad"
+  (write-scad
+    plate-projection
+  )
+)
+
+(spit "things/right-plate.scad"
+  (write-scad
+    plate-extruded
+  )
+)
+
+(spit "things/left-plate.scad"
+  (write-scad
+    (mirror [-1 0 0] plate-extruded)
   )
 )
 

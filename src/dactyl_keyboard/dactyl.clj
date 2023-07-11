@@ -23,7 +23,6 @@
 ; (def column-style
 ;   (if (> nrows 5) :orthographic :standard))  ; options include :standard, :orthographic, and :fixed
 (def column-style :orthographic)
-(def pinky-15u false)
 
 (defn column-offset [column] (cond
                                (= column 2) [0 2.82 0]
@@ -175,7 +174,7 @@
 (def column-x-delta (+ -1 (- (* column-radius (Math/sin β)))))
 
 (defn offset-for-column [col]
-  (if (and (true? pinky-15u) (= col lastcol)) 5.5 0))
+  (if (= col lastcol) 5.5 0))
 (defn apply-key-geometry [translate-fn rotate-x-fn rotate-y-fn column row shape]
   (let [column-angle (* β (- centercol column))
         placed-shape (->> shape
@@ -247,7 +246,7 @@
                row rows
                :when (or (.contains [1 2 3] column)
                          (not= row lastrow))]
-           (->> (sa-cap (if (and (true? pinky-15u) (= column lastcol)) 1.5 1))
+           (->> (sa-cap (if (= column lastcol) 1.5 1))
                 (key-place column row)))))
 
 ;;;;;;;;;;;;;;;;;;;;
@@ -268,15 +267,10 @@
 
 ; wide posts for 1.5u keys in the main cluster
 
-(if (true? pinky-15u)
-  (do (def wide-post-tr (translate [(- (/ mount-width 1.2) post-adj)  (- (/ mount-height  2) post-adj) 0] web-post))
-      (def wide-post-tl (translate [(+ (/ mount-width -1.2) post-adj) (- (/ mount-height  2) post-adj) 0] web-post))
-      (def wide-post-bl (translate [(+ (/ mount-width -1.2) post-adj) (+ (/ mount-height -2) post-adj) 0] web-post))
-      (def wide-post-br (translate [(- (/ mount-width 1.2) post-adj)  (+ (/ mount-height -2) post-adj) 0] web-post)))
-  (do (def wide-post-tr web-post-tr)
-      (def wide-post-tl web-post-tl)
-      (def wide-post-bl web-post-bl)
-      (def wide-post-br web-post-br)))
+(do (def wide-post-tr web-post-tr)
+    (def wide-post-tl web-post-tl)
+    (def wide-post-bl web-post-bl)
+    (def wide-post-br web-post-br))
 
 (defn triangle-hulls [& shapes]
   (apply union

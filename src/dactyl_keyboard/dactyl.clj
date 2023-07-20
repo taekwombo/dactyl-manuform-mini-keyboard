@@ -1,3 +1,12 @@
+;; Things to hmm about:
+;; - reduce horizontal spacing between keys to match Lily58
+;; - increase size of reset switch hole
+;; - decrease radius of screw insert hole
+;; - decrease key hole size
+;; - make battery holder (above battery) thinner
+;; - remove bottom thumb key - use bottom index finger key instead
+;; - 3 rows on outter pinky column
+
 (ns dactyl-keyboard.dactyl
   (:refer-clojure :exclude [use import])
   (:require [clojure.core.matrix :refer [array matrix mmul]]

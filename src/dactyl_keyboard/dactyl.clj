@@ -1,7 +1,5 @@
 ;; Things to hmm about:
-;; - reduce horizontal spacing between keys to match Lily58
 ;; - increase size of reset switch hole
-;; - decrease radius of screw insert hole
 ;; - 3 rows on outter pinky column
 
 (ns dactyl-keyboard.dactyl
@@ -627,12 +625,9 @@
     (screw-insert bottom-radius top-radius height       screw-4-pos)
     (screw-insert bottom-radius top-radius (- height 1) screw-5-pos)))
 
-; Hole Depth Y: 4.4
 (def screw-insert-height 4)
-
-; Hole Diameter C: 4.1-4.4
-(def screw-insert-bottom-radius (/ 4.4 2))
-(def screw-insert-top-radius (/ 4.4 2))
+(def screw-insert-bottom-radius (/ 4.1 2))
+(def screw-insert-top-radius (/ 4.1 2))
 (def screw-insert-holes  (screw-insert-all-shapes screw-insert-bottom-radius screw-insert-top-radius screw-insert-height))
 
 ; Wall Thickness W:\t1.65

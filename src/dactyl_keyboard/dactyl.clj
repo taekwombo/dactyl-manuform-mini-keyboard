@@ -2,7 +2,6 @@
 ;; - reduce horizontal spacing between keys to match Lily58
 ;; - increase size of reset switch hole
 ;; - decrease radius of screw insert hole
-;; - decrease key hole size
 ;; - make battery holder (above battery) thinner
 ;; - 3 rows on outter pinky column
 
@@ -28,13 +27,10 @@
 (def centerrow (- nrows 2))             ; controls front-back tilt
 (def centercol 0.5)                     ; controls left-right tilt / tenting (higher number is more tenting)
 (def tenting-angle (/ π 24))            ; or, change this for more precise tenting control
-; (def column-style
-;   (if (> nrows 5) :orthographic :standard))  ; options include :standard, :orthographic, and :fixed
 (def column-style :orthographic)
-
 (defn column-offset [column] (cond
                                (= column 2) [0 2.82 0]
-                               (>= column 4) [0 -16 1]            ; original [0 -5.8 5.64]
+                               (>= column 4) [0 -16 1]
                                :else [0 0 0]))
 
 ;; Move thumb cluster outside of the center of keyboard.
@@ -44,7 +40,7 @@
 
 (def keyboard-z-offset 10)               ; controls overall height; original=9 with centercol=3; use 16 for centercol=2
 
-(def extra-width 2.5)                   ; extra space between the base of keys; original= 2
+(def extra-width 1.5)                   ; extra space between the base of keys; original= 2
 (def extra-height 1.0)                  ; original= 0.5
 
 (def wall-z-offset -5)                 ; original=-15 length of the first downward-sloping part of the wall (negative)
@@ -77,8 +73,8 @@
 ;; Switch Hole ;;
 ;;;;;;;;;;;;;;;;;
 
-(def keyswitch-height 14.2) ;; Was 14.1, then 14.25
-(def keyswitch-width 14.2)
+(def keyswitch-height 14.02)
+(def keyswitch-width 14.02)
 
 (def sa-profile-key-height 12.7)
 
@@ -694,7 +690,7 @@
   (apply union
          (for [column columns
                row rows
-               :when (or (.contains [1 2 3] column) ; Place additional row.
+               :when (or (.contains [2 3] column)
                          (not= row lastrow))]
            (->> switch
                 (key-place column row)))))

@@ -2,7 +2,6 @@
 ;; - reduce horizontal spacing between keys to match Lily58
 ;; - increase size of reset switch hole
 ;; - decrease radius of screw insert hole
-;; - make battery holder (above battery) thinner
 ;; - 3 rows on outter pinky column
 
 (ns dactyl-keyboard.dactyl
@@ -708,7 +707,7 @@
     (translate [(- 9 (/ keyswitch-width 2)) 0 0]) ; Left nano border to the left border of column
     (translate [0 (* (+ centerrow 1) keyswitch-height) 0])
     (translate [0 (+ extra-height wall-thickness wall-xy-offset 6) 0])
-    (translate [4 1.5 0])
+    (translate [4 1.6 0])
   )
 )
 

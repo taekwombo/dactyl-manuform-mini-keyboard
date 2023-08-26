@@ -23,22 +23,22 @@
 (def battery-holder
   (union
     ; Bottom
-    (translate [-8 (- (/ battery-length -2) 2.5) (/ (+ battery-height 2) 2)]
+    (translate [(- (/ battery-width 2) 4) (- (/ battery-length -2) 2) (/ (+ battery-height 2) 2)]
       (union
-        (cube 8 4 (+ battery-height 2))
-        (translate [0 2 (+ (/ battery-height 2) 1)] (cube 8 8 2))
+        (cube 8 3 (+ battery-height 2))
+        (translate [0 1 (+ (/ battery-height 2) 1)] (cube 8 5 2))
       )
     )
-    (translate [(- (/ battery-width -2) 2.5) 10 (/ (+ battery-height 2) 2)]
-      (cube 4 8 (+ battery-height 2))
-      (translate [2 0 (+ (/ battery-height 2) 1)] (cube 8 8 2))
+    (translate [(- (/ battery-width -2) 2) 10 (/ (+ battery-height 2) 2)]
+      (cube 3 8 (+ battery-height 2))
+      (translate [1 0 (+ (/ battery-height 2) 1)] (cube 5 8 2))
     )
   )
 )
 
 (defn place-battery [shape]
   (->> shape
-    (translate [95 22 0])    
+    (translate [90 22 0])    
   )
 )
 

@@ -576,9 +576,9 @@
     (key-wall-brace 4 0 0.5 1 web-post-tl 3 0 0 1 web-post-tr)
     (key-wall-brace 4 0 0.5 1 web-post-tl 4       0 0 1 web-post-tr)
     ; front wall
-    (key-wall-brace 2 lastrow 0 -1 web-post-br 2 lastrow 0.5 -1 web-post-bl)
-    (key-wall-brace 2 lastrow 0 -1 web-post-br 3 lastrow -0.5 -1 web-post-bl)
-    (key-wall-brace 3 lastrow -0.5 -1 web-post-bl 3 lastrow 0.5 -1 web-post-br)
+    (key-wall-brace 2 lastrow -0.5 -1 web-post-br 2 lastrow 0.5 -1 web-post-bl)
+    (key-wall-brace 2 lastrow -0.5 -1 web-post-br 3 lastrow 0 -1 web-post-bl)
+    (key-wall-brace 3 lastrow 0 -1 web-post-bl 3 lastrow 0.5 -1 web-post-br)
     (key-wall-brace 3 lastrow 0.5 -1 web-post-br 4 cornerrow 0.5 -1 web-post-bl)
     (key-wall-brace 4 cornerrow 0.5 -1 web-post-bl 4 cornerrow 0 -1 web-post-br)
     (for [x (range 5 ncols)] (key-wall-brace x cornerrow 0 -1 web-post-bl x       cornerrow 0 -1 web-post-br))

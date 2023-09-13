@@ -27,7 +27,7 @@
 (def column-style :orthographic)
 (defn column-offset [column] (cond
                                (= column 2) [0 2.82 0]
-                               (>= column 4) [0 -16 1]
+                               (>= column 4) [0 -14 1]
                                :else [0 0 0]))
 
 ;; Move thumb cluster outside of the center of keyboard.
@@ -803,6 +803,7 @@
       thumbcaps
       power-switch
       reset-switch
+      holder
     )
     (translate [0 0 -20] (cube 350 350 40))
   )

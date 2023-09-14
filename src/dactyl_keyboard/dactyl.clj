@@ -1,6 +1,5 @@
 ;; Things to hmm about:
 ;; - increase size of reset switch hole
-;; - 3 rows on outter pinky column
 
 (ns dactyl-keyboard.dactyl
   (:refer-clojure :exclude [use import])
@@ -27,7 +26,7 @@
 (def column-style :orthographic)
 (defn column-offset [column] (cond
                                (= column 2) [0 2.82 0]
-                               (>= column 4) [0 -14 1]
+                               (>= column 4) [0 -12 1]
                                :else [0 0 0]))
 
 ;; Move thumb cluster outside of the center of keyboard.
@@ -37,7 +36,7 @@
 
 (def keyboard-z-offset 10)               ; controls overall height; original=9 with centercol=3; use 16 for centercol=2
 
-(def extra-width 1.5)                   ; extra space between the base of keys; original= 2
+(def extra-width 1.0)                   ; extra space between the base of keys; original= 2
 (def extra-height 1.0)                  ; original= 0.5
 
 (def wall-z-offset -5)                 ; original=-15 length of the first downward-sloping part of the wall (negative)
@@ -613,8 +612,8 @@
 
 (def screw-1-pos (screw-insert-place 1 0                  [13 -1 0]))
 (def screw-2-pos (screw-insert-place 0 lastrow            [9 11 0]))
-(def screw-3-pos (screw-insert-place lastcol lastrow      [-3 14 0]))
-(def screw-4-pos (screw-insert-place lastcol 0            [-3 6 0]))
+(def screw-3-pos (screw-insert-place lastcol lastrow      [-3.5 13 0]))
+(def screw-4-pos (screw-insert-place lastcol 0            [-3.5 6 0]))
 (def screw-5-pos (screw-insert-place 2 lastrow            [-9 2 0]))
 
 (defn screw-insert-all-shapes [bottom-radius top-radius height]

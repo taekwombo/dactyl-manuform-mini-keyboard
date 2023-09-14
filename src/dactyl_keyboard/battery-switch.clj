@@ -29,7 +29,7 @@
         (translate [0 1 (+ (/ battery-height 2) 1)] (cube 8 5 2))
       )
     )
-    (translate [(- (/ battery-width -2) 2) 10 (/ (+ battery-height 2) 2)]
+    (translate [(- (/ battery-width -2) 2) 14 (/ (+ battery-height 2) 2)]
       (cube 3 8 (+ battery-height 2))
       (translate [1 0 (+ (/ battery-height 2) 1)] (cube 5 8 2))
     )
@@ -38,7 +38,7 @@
 
 (defn place-battery [shape]
   (->> shape
-    (translate [90 22 0])    
+    (translate [87 22 0])    
   )
 )
 
@@ -51,7 +51,7 @@
     )
     (rotate (/ π 2) [0 1 0])
     (rotate (/ π 2) [0 0 1])
-    (translate [80 57 (+ (/ 3.5 2) 5)])
+    (translate [80 60 (+ (/ 3.5 2) 5)])
   )
 )
 

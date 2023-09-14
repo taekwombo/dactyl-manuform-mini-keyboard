@@ -589,8 +589,13 @@
 
 (defn screw-insert-shape [bottom-radius top-radius height]
   (union
-   (->> (binding [*fn* 30]
-          (cylinder [bottom-radius top-radius] height)))
+    (->>
+      (binding [*fn* 30]
+        (with-fn 90
+          (cylinder [bottom-radius top-radius] height)
+        )
+      )
+   )
    (translate [0 0 (/ height 2)] (->> (binding [*fn* 30] (sphere top-radius))))))
 
 (defn screw-insert-place [column row offset]

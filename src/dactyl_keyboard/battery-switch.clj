@@ -76,7 +76,7 @@
 (def screw-head-radius 3)
 (def screw-radius 1.5)
 (def screw-height 6)
-(def screw-head-height 1.8)
+(def screw-head-height 2)
 (def screw-head-until 0.6)
 
 (defn screw-head-hole [position]
@@ -87,7 +87,7 @@
         (translate [0 0 (/ (* screw-head-height screw-head-until) 2)]
           (cylinder
             [
-              screw-head-radius
+              (+ screw-head-radius 0.5)
               (+ 
                 (* screw-head-radius (- 1.0 screw-head-until))
                 (* screw-radius screw-head-until)

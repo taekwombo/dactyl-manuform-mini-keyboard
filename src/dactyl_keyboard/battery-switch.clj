@@ -46,7 +46,7 @@
 (def power-switch
   (->>
     (union
-      (cube 3.5 9 3.5)
+      (cube 3.5 9 4.5)
       (translate [0 0 (/ 3.5 2)] (cube 1.6 1.5 2))
     )
     (rotate (/ π 2) [0 1 0])
@@ -59,7 +59,7 @@
 (def reset-switch
   (->>
     (union
-      (cube 3 6 5)
+      (cube 3.5 6.2 5)
       (translate [0 0 2.5] (cube 1.6 1.5 2))
     )
     (rotate (/ π 2) [0 -1 0])
